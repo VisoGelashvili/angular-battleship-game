@@ -1,0 +1,232 @@
+<div class="game-root">
+
+  <!-- ═══════════════════════ SETUP PHASE ═══════════════════════ -->
+  @if (game.phase() === 'setup') {
+    <header class="game-header">
+      <h1 class="game-title">BATTLESHIP</h1>
+      <p class="game-subtitle">Deploy your fleet to begin the battle</p>
+    </header>
+
+    <div class="setup-layout">
+
+      <!-- Player Board -->
+      <div class="board-section">
+        <app-board
+          [cells]="game.playerBoard()"
+          [ships]="game.playerShips()"
+          mode="setup"
+          [orientation]="game.orientation()"
+          [hoverCells]="hoverCells()"
+          [hoverValid]="hoverValid()"
+          boardId="player-board-drop"
+          label="Your Ocean"
+          (shipDropped)="onShipDroppedOnBoard($event)"
+          (shipRemoved)="game.removeShip($event)"
+        />
+      </div>
+
+      <!-- Controls + Ship Dock -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Fleet</h3>
+          <p class="sidebar-hint">
+            @if (game.unplacedShips().length > 0) {
+              Drag ships onto your grid — or use Random Placement.
+            } @else {
+              All ships deployed! Hit <strong>Start Battle</strong> when ready.
+            }
+          </p>
+        </div>
+
+        <!-- Ship Dock -->
+        <div
+          class="ship-dock"
+          cdkDropList
+          id="ship-dock"
+          [cdkDropListSortingDisabled]="true"
+          [cdkDropListConnectedTo]="['player-board-drop']"
+          (cdkDropListDropped)="onDockDrop($event)"
+        >
+          @for (ship of game.unplacedShips(); track ship.id) {
+            <div
+              class="ship-drag-wrapper"
+              cdkDrag
+              [cdkDragData]="ship.id"
+              (cdkDragMoved)="onDragMoved($event, ship)"
+              (cdkDragEnded)="onDragEnded()"
+            >
+              <app-ship [ship]="ship" [orientation]="game.orientation()" />
+
+              <ng-template cdkDragPreview>
+                <app-ship [ship]="ship" [orientation]="game.orientation()" class="drag-preview-host" />
+              </ng-template>
+
+              <ng-template cdkDragPlaceholder>
+                <div class="drag-placeholder"></div>
+              </ng-template>
+            </div>
+          }
+
+          @if (game.unplacedShips().length === 0) {
+            <p class="dock-empty">Fleet deployed</p>
+          }
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+          <button class="btn btn-secondary" (click)="game.toggleOrientation()">
+            @if (game.orientation() === 'horizontal') {
+              ↔ Horizontal
+            } @else {
+              ↕ Vertical
+            }
+          </button>
+
+          <button class="btn btn-secondary" (click)="game.randomPlacement()">
+            ⚄ Random
+          </button>
+
+          @if (game.allShipsPlaced()) {
+            <button class="btn btn-primary" (click)="game.startBattle()">
+              ⚔ Start Battle
+            </button>
+          }
+        </div>
+
+        <!-- Placed ships list -->
+        @if (game.playerShips().length > game.unplacedShips().length) {
+          <div class="placed-ships">
+            <h4 class="sidebar-title">Placed</h4>
+            @for (ship of game.playerShips(); track ship.id) {
+              @if (ship.row !== null) {
+                <div class="placed-ship-row" (click)="game.removeShip(ship.id)" title="Click to remove">
+                  <span class="placed-ship-name">{{ ship.type }}</span>
+                  <span class="placed-ship-pos">
+                    {{ ['A','B','C','D','E','F','G','H','I','J'][ship.col!] }}{{ ship.row! + 1 }}
+                    {{ ship.orientation === 'horizontal' ? '↔' : '↕' }}
+                  </span>
+                  <span class="placed-remove">✕</span>
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+
+  <!-- ═══════════════════════ BATTLE PHASE ═══════════════════════ -->
+  @if (game.phase() === 'battle') {
+    <header class="game-header">
+      <h1 class="game-title">BATTLESHIP</h1>
+      <div class="turn-indicator" [class.player-turn]="game.turn() === 'player'" [class.computer-turn]="game.turn() === 'computer'">
+        @if (game.isAnimating()) {
+          <span class="thinking">💭 Computer is thinking…</span>
+        } @else if (game.turn() === 'player') {
+          <span>🎯 Your turn — click the enemy grid to fire</span>
+        } @else {
+          <span>⏳ Waiting…</span>
+        }
+      </div>
+    </header>
+
+    <div class="battle-layout">
+
+      <!-- Player Board -->
+      <div class="board-section">
+        <app-board
+          [cells]="game.playerBoard()"
+          [ships]="game.playerShips()"
+          mode="player"
+          label="Your Fleet"
+        />
+        <div class="ship-status">
+          @for (ship of game.playerShips(); track ship.id) {
+            <div class="status-ship" [class.sunk]="ship.sunk">
+              <span class="status-name">{{ shipAbbr[ship.type] }}</span>
+              @for (i of range(ship.size); track i) {
+                <div class="status-cell" [class.hit]="$index < ship.hitCount" [class.sunk]="ship.sunk"></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="battle-divider">
+        <div class="divider-line"></div>
+        <span class="divider-icon">⚓</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Enemy Board -->
+      <div class="board-section">
+        <app-board
+          [cells]="game.enemyBoard()"
+          [ships]="game.enemyShips()"
+          mode="enemy"
+          label="Enemy Waters"
+          (cellClicked)="game.playerFire($event.row, $event.col)"
+        />
+        <div class="ship-status">
+          @for (ship of game.enemyShips(); track ship.id) {
+            <div class="status-ship" [class.sunk]="ship.sunk">
+              <span class="status-name">{{ shipAbbr[ship.type] }}</span>
+              @for (i of range(ship.size); track i) {
+                <div class="status-cell" [class.hit]="$index < ship.hitCount" [class.sunk]="ship.sunk"></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+
+  <!-- ═══════════════════════ GAME OVER ═══════════════════════ -->
+  @if (game.phase() === 'gameover') {
+    <div class="gameover-overlay">
+      <div class="gameover-card">
+        <div class="gameover-icon">
+          @if (game.winner() === 'player') { 🏆 } @else { 💀 }
+        </div>
+        <h1 class="gameover-title">
+          @if (game.winner() === 'player') {
+            Victory!
+          } @else {
+            Defeat
+          }
+        </h1>
+        <p class="gameover-message">
+          @if (game.winner() === 'player') {
+            You sunk the entire enemy fleet. Admiral!
+          } @else {
+            Your fleet has been destroyed. The ocean is theirs.
+          }
+        </p>
+
+        <div class="gameover-stats">
+          <div class="stat">
+            <span class="stat-value">
+              {{ game.enemyShips().filter(s => s.sunk).length }} / {{ game.enemyShips().length }}
+            </span>
+            <span class="stat-label">Enemy ships sunk</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">
+              {{ game.playerShips().filter(s => s.sunk).length }} / {{ game.playerShips().length }}
+            </span>
+            <span class="stat-label">Your ships lost</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-large" (click)="game.resetGame()">
+          ↩ Play Again
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

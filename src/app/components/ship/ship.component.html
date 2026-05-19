@@ -1,0 +1,14 @@
+<div
+  class="ship-item"
+  [class.horizontal]="isHorizontal"
+  [class.vertical]="!isHorizontal"
+  [attr.title]="ship.type + ' (' + ship.size + ' cells)'"
+>
+  <span class="ship-name">{{ ship.type }}</span>
+  <div class="ship-cells">
+    @for (c of cells; track c) {
+      <div class="ship-cell"></div>
+    }
+  </div>
+  <span class="ship-size">×{{ ship.size }}</span>
+</div>

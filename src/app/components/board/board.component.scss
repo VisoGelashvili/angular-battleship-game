@@ -1,0 +1,177 @@
+:host {
+  display: block;
+}
+
+.board-label {
+  text-align: center;
+  color: #a8d8ea;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.board-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.col-labels {
+  display: flex;
+  margin-left: 1.6rem;
+}
+
+.board-body {
+  display: flex;
+}
+
+.row-labels {
+  display: flex;
+  flex-direction: column;
+  width: 1.6rem;
+}
+
+.axis-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #a8d8ea;
+  opacity: 0.8;
+  flex-shrink: 0;
+
+  .row-labels & {
+    width: 1.6rem;
+  }
+
+  .col-labels & {
+    width: 2.8rem;
+  }
+}
+
+.corner {
+  width: 1.6rem;
+  height: 2.8rem;
+  flex-shrink: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 2.8rem);
+  grid-template-rows: repeat(10, 2.8rem);
+  border: 2px solid #1e6091;
+  position: relative;
+  background: #0d2137;
+}
+
+.cell {
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 1px solid rgba(30, 96, 145, 0.35);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+  background: linear-gradient(135deg, #0d2137 0%, #0a1c30 100%);
+  position: relative;
+
+  &.clickable {
+    cursor: crosshair;
+
+    &:hover {
+      background: rgba(30, 96, 145, 0.35);
+    }
+  }
+
+  &.state-ship {
+    background: linear-gradient(135deg, #1a3a5c 0%, #1e4a70 100%);
+  }
+
+  &.state-hit {
+    background: linear-gradient(135deg, #8b1a1a 0%, #c0392b 100%);
+  }
+
+  &.state-miss {
+    background: linear-gradient(135deg, #0d2137 0%, #0a1c30 100%);
+  }
+
+  &.state-sunk {
+    background: linear-gradient(135deg, #5c1010 0%, #7b241c 100%);
+  }
+
+  &.hover-valid {
+    background: rgba(46, 213, 115, 0.35);
+    border-color: rgba(46, 213, 115, 0.7);
+  }
+
+  &.hover-invalid {
+    background: rgba(192, 57, 43, 0.35);
+    border-color: rgba(192, 57, 43, 0.7);
+  }
+}
+
+.miss-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: rgba(168, 216, 234, 0.7);
+}
+
+.ship-overlay {
+  position: absolute;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #2e6da4 0%, #1a4a7a 50%, #2e6da4 100%);
+  border: 2px solid #5a9fd4;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.5);
+  cursor: pointer;
+  z-index: 2;
+  transition: filter 0.15s;
+  pointer-events: all;
+
+  &:hover {
+    filter: brightness(1.2);
+  }
+
+  &.sunk {
+    background: linear-gradient(135deg, #7b241c 0%, #5c1010 100%);
+    border-color: #c0392b;
+  }
+}
+
+.player-ship {
+  background: linear-gradient(135deg, #2e6da4 0%, #1a4a7a 50%, #2e6da4 100%);
+  border: 2px solid #5a9fd4;
+  pointer-events: none;
+  cursor: default;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: repeat(10, 2.2rem);
+    grid-template-rows: repeat(10, 2.2rem);
+  }
+
+  .cell {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .axis-label {
+    width: 2.2rem;
+    height: 2.2rem;
+
+    .col-labels & {
+      width: 2.2rem;
+    }
+  }
+
+  .corner {
+    height: 2.2rem;
+  }
+}

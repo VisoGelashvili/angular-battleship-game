@@ -1,0 +1,62 @@
+@if (label) {
+  <h2 class="board-label">{{ label }}</h2>
+}
+
+<div class="board-wrapper">
+  <div class="col-labels">
+    <div class="corner"></div>
+    @for (lbl of colLabels; track lbl) {
+      <div class="axis-label">{{ lbl }}</div>
+    }
+  </div>
+
+  <div class="board-body">
+    <div class="row-labels">
+      @for (lbl of rowLabels; track lbl) {
+        <div class="axis-label">{{ lbl }}</div>
+      }
+    </div>
+
+    <div
+      class="grid"
+      [id]="boardId"
+      cdkDropList
+      [cdkDropListSortingDisabled]="true"
+      [cdkDropListDisabled]="mode !== 'setup'"
+      (cdkDropListDropped)="onBoardDrop($event)"
+    >
+      @for (row of rows; track row) {
+        @for (col of cols; track col) {
+          <div
+            [class]="getCellClasses(cells[row][col], row, col)"
+            (click)="onCellClick(row, col)"
+          >
+            @if (mode !== 'setup' && cells[row][col].state === 'miss') {
+              <div class="miss-dot"></div>
+            }
+          </div>
+        }
+      }
+
+      @if (mode === 'setup') {
+        @for (ship of placedShips; track ship.id) {
+          <div
+            class="ship-overlay"
+            [class.sunk]="ship.sunk"
+            [style]="getShipStyle(ship)"
+            (click)="shipRemoved.emit(ship.id)"
+            title="Click to remove"
+          ></div>
+        }
+      }
+
+      @if (mode === 'player') {
+        @for (ship of placedShips; track ship.id) {
+          @if (!ship.sunk) {
+            <div class="ship-overlay player-ship" [style]="getShipStyle(ship)"></div>
+          }
+        }
+      }
+    </div>
+  </div>
+</div>

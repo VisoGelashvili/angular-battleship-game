@@ -1,0 +1,420 @@
+/* ── Global variables ───────────────────────── */
+:host {
+  --ocean-deep:   #060f1a;
+  --ocean-dark:   #0a1628;
+  --ocean-mid:    #0d2137;
+  --ocean-navy:   #1a3a5c;
+  --ocean-blue:   #1e6091;
+  --sky-blue:     #2980b9;
+  --accent-light: #a8d8ea;
+  --accent-glow:  #5a9fd4;
+  --hit-red:      #c0392b;
+  --sunk-dark:    #7b241c;
+  --miss-white:   #ecf0f1;
+  --text-primary: #e8f4f8;
+  --text-muted:   #6a9cbf;
+}
+
+/* ── Layout shell ───────────────────────────── */
+.game-root {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #0d2137 0%, #060f1a 70%);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 1.5rem 1rem 2rem;
+  box-sizing: border-box;
+}
+
+/* ── Header ─────────────────────────────────── */
+.game-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.game-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  background: linear-gradient(135deg, #a8d8ea, #5a9fd4, #2980b9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.25rem;
+  text-shadow: none;
+}
+
+.game-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* ── Turn indicator ─────────────────────────── */
+.turn-indicator {
+  display: inline-block;
+  padding: 0.4rem 1.2rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.4rem;
+  background: rgba(26, 58, 92, 0.5);
+  border: 1px solid var(--ocean-blue);
+  color: var(--accent-light);
+
+  &.player-turn {
+    border-color: #2ecc71;
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+  }
+
+  &.computer-turn {
+    border-color: var(--hit-red);
+    color: #e74c3c;
+    background: rgba(192, 57, 43, 0.1);
+  }
+}
+
+.thinking {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Setup layout ───────────────────────────── */
+.setup-layout {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.board-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ── Sidebar ────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 220px;
+  max-width: 260px;
+}
+
+.sidebar-section {
+  background: rgba(26, 58, 92, 0.3);
+  border: 1px solid rgba(30, 96, 145, 0.3);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+
+.sidebar-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-glow);
+  margin: 0 0 0.4rem;
+}
+
+.sidebar-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Ship dock ──────────────────────────────── */
+.ship-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(13, 33, 55, 0.6);
+  border: 1px dashed rgba(30, 96, 145, 0.5);
+  border-radius: 10px;
+  padding: 0.75rem;
+  min-height: 80px;
+}
+
+.ship-drag-wrapper {
+  cursor: grab;
+
+  &:active { cursor: grabbing; }
+}
+
+.drag-placeholder {
+  height: 2.5rem;
+  border: 2px dashed rgba(90, 159, 212, 0.4);
+  border-radius: 6px;
+  background: rgba(30, 96, 145, 0.08);
+}
+
+.dock-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+/* drag-preview-host rendered by CDK outside the DOM tree */
+:global(.drag-preview-host) {
+  opacity: 0.85;
+  filter: drop-shadow(0 4px 12px rgba(90,159,212,0.5));
+  pointer-events: none;
+}
+
+/* ── Controls ───────────────────────────────── */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  letter-spacing: 0.03em;
+
+  &:hover   { filter: brightness(1.15); transform: translateY(-1px); }
+  &:active  { transform: translateY(0); }
+}
+
+.btn-secondary {
+  background: rgba(26, 58, 92, 0.8);
+  border: 1px solid var(--ocean-blue);
+  color: var(--accent-light);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1e6091, #2980b9);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(30, 96, 145, 0.4);
+}
+
+.btn-large {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+}
+
+/* ── Placed ships list ──────────────────────── */
+.placed-ships {
+  background: rgba(13, 33, 55, 0.5);
+  border: 1px solid rgba(30, 96, 145, 0.25);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+}
+
+.placed-ship-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 0.8rem;
+
+  &:hover {
+    background: rgba(192, 57, 43, 0.15);
+
+    .placed-remove { opacity: 1; }
+  }
+}
+
+.placed-ship-name { flex: 1; color: var(--accent-light); }
+.placed-ship-pos  { color: var(--text-muted); }
+.placed-remove    { color: var(--hit-red); opacity: 0; transition: opacity 0.15s; }
+
+/* ── Battle layout ──────────────────────────── */
+.battle-layout {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.battle-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 3rem;
+  color: var(--ocean-blue);
+
+  .divider-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--ocean-blue), transparent);
+  }
+
+  .divider-icon {
+    font-size: 1.4rem;
+  }
+}
+
+/* ── Ship status strips ─────────────────────── */
+.ship-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.status-ship {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  &.sunk {
+    opacity: 0.5;
+    .status-cell { background: var(--sunk-dark); border-color: var(--hit-red); }
+    .status-name { text-decoration: line-through; color: var(--text-muted); }
+  }
+}
+
+.status-name {
+  font-size: 0.7rem;
+  width: 2.4rem;
+  min-width: 2.4rem;
+  color: var(--accent-glow);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.status-cell {
+  width: 1.1rem;
+  height: 1.1rem;
+  background: rgba(26, 58, 92, 0.6);
+  border: 1px solid var(--ocean-blue);
+  border-radius: 2px;
+  transition: background 0.2s;
+
+  &.hit  { background: var(--hit-red); border-color: #e74c3c; }
+  &.sunk { background: var(--sunk-dark); }
+}
+
+/* ── Game Over ──────────────────────────────── */
+.gameover-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 3rem);
+}
+
+.gameover-card {
+  background: linear-gradient(160deg, #0d2137, #060f1a);
+  border: 1px solid var(--ocean-blue);
+  border-radius: 16px;
+  padding: 3rem 3.5rem;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 60px rgba(30, 96, 145, 0.15);
+  max-width: 420px;
+  width: 100%;
+}
+
+.gameover-icon {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+}
+
+.gameover-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem;
+  background: linear-gradient(135deg, #a8d8ea, #5a9fd4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gameover-message {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.gameover-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent-light);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 820px) {
+  .battle-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .battle-divider {
+    flex-direction: row;
+    padding-top: 0;
+
+    .divider-line {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--ocean-blue), transparent);
+    }
+  }
+
+  .setup-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sidebar {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .ship-dock {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .gameover-card {
+    padding: 2rem;
+  }
+}
